@@ -48,12 +48,16 @@ async def predict(request: Request, variance: float = Form(...), skewness: float
     knn_prediction = make_prediction(knn_model, scaled_features)
     nn_prediction = make_prediction(neural_network_model, scaled_features)
 
-    # Render the results page with predictions
+    # Inverse transform the scaled features to original values
+    original_features = scaler.inverse_transform(scaled_features)
+
+    # Render the results page with predictions and original data
     return templates.TemplateResponse("result.html", {
         "request": request,
         "logistic_regression": logistic_regression_prediction,
         "svm": svm_prediction,
         "random_forest": rfc_prediction,
         "knn": knn_prediction,
-        "neural_network": nn_prediction
+        "neural_network": nn_prediction,
+        "original_features": original_features[0]  # Send the original feature values
     })
