@@ -1,25 +1,20 @@
-from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
+from flask import Flask, render_template, request
 import joblib
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
-# Initialize FastAPI app
-app = FastAPI()
+# Initialize Flask app with the name "Note Authentication App"
+app = Flask(__name__, template_folder='templates')
 
-# Load saved models
-logistic_regression_model = joblib.load('logistic_regression_model.pkl')
-svm_model = joblib.load('svm_model.pkl')
-rfc_model = joblib.load('random_forest_model.pkl')
-knn_model = joblib.load('knn_model.pkl')
-neural_network_model = joblib.load('neural_network_model.pkl')
+# Load saved models (Make sure these files exist in your 'models' folder)
+logistic_regression_model = joblib.load('models/logistic_regression_model.pkl')
+svm_model = joblib.load('models/svm_model.pkl')
+rfc_model = joblib.load('models/random_forest_model.pkl')
+knn_model = joblib.load('models/knn_model.pkl')
+neural_network_model = joblib.load('models/neural_network_model.pkl')
 
 # Load scaler (assuming you saved it as scaler.pkl)
-scaler = joblib.load('scaler.pkl')
-
-# Jinja2 template renderer
-templates = Jinja2Templates(directory="templates")
+scaler = joblib.load('models/scaler.pkl')
 
 # Define function to make predictions
 def make_prediction(model, data):
@@ -27,14 +22,19 @@ def make_prediction(model, data):
     return prediction[0]
 
 # Home page route
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+@app.route("/", methods=["GET"])
+def home():
+    return render_template("index.html")
 
 # Prediction route
-@app.post("/predict", response_class=HTMLResponse)
-async def predict(request: Request, variance: float = Form(...), skewness: float = Form(...), 
-                  curtosis: float = Form(...), entropy: float = Form(...)):
+@app.route("/predict", methods=["POST"])
+def predict():
+    # Get form input data
+    variance = float(request.form['variance'])
+    skewness = float(request.form['skewness'])
+    curtosis = float(request.form['curtosis'])
+    entropy = float(request.form['entropy'])
+
     # Prepare the feature vector
     features = np.array([variance, skewness, curtosis, entropy])
 
@@ -52,12 +52,13 @@ async def predict(request: Request, variance: float = Form(...), skewness: float
     original_features = scaler.inverse_transform(scaled_features)
 
     # Render the results page with predictions and original data
-    return templates.TemplateResponse("result.html", {
-        "request": request,
-        "logistic_regression": logistic_regression_prediction,
-        "svm": svm_prediction,
-        "random_forest": rfc_prediction,
-        "knn": knn_prediction,
-        "neural_network": nn_prediction,
-        "original_features": original_features[0]  # Send the original feature values
-    })
+    return render_template("result.html", 
+                           logistic_regression=logistic_regression_prediction,
+                           svm=svm_prediction,
+                           random_forest=rfc_prediction,
+                           knn=knn_prediction,
+                           neural_network=nn_prediction,
+                           original_features=original_features[0])
+
+if __name__ == "__main__":
+    app.run(debug=True)
