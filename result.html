@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+            margin-top: 50px;
+        }
+        h1 {
+            color: #333;
+            font-size: 32px;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e8f4f8;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Prediction Results</h1>
+    <div class="result">
+        <h2>Model Predictions:</h2>
+        <p><strong>Logistic Regression:</strong> {{ logistic_regression }}</p>
+        <p><strong>SVM:</strong> {{ svm }}</p>
+        <p><strong>Random Forest:</strong> {{ random_forest }}</p>
+        <p><strong>KNN:</strong> {{ knn }}</p>
+        <p><strong>Neural Network:</strong> {{ neural_network }}</p>
+        <button onclick="window.location.href='/'">Try Again</button>
+    </div>
+</body>
+</html>
